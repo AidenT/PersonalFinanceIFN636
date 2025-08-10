@@ -8,9 +8,13 @@
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\""
   },
   "devDependencies": {
-    "chai": "^5.1.2",
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/sinon": "^17.0.4",
+    "chai": "^5.2.1",
     "concurrently": "^7.0.0",
-    "mocha": "^11.0.1"
+    "mocha": "^11.0.1",
+    "sinon": "^21.0.0"
   },
   "author": "Personal Finance Tracker Team",
   "license": "ISC",
