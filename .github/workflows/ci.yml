@@ -48,6 +48,7 @@ jobs:
        npm install --global yarn
        yarn --version
        yarn install
+       yarn run build
       
     # Install dependencies for frontend
     - name: Install Frontend Dependencies
