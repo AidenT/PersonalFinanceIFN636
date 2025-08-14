@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import IncomePage from './pages/Income';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 
@@ -18,6 +19,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/income" element={<IncomePage />} />
       </Routes>
     </Router>
   );
