@@ -1,12 +1,9 @@
+import { ExpressResponse } from '../types/authTypes';
 interface ExpressRequest {
     body: any;
     user?: {
         id: string;
     };
-}
-interface ExpressResponse {
-    status: (code: number) => ExpressResponse;
-    json: (data: any) => void;
 }
 declare const registerUser: (req: ExpressRequest, res: ExpressResponse) => Promise<void>;
 declare const loginUser: (req: ExpressRequest, res: ExpressResponse) => Promise<void>;

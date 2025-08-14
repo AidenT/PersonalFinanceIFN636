@@ -3,6 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import IncomeForm from '../components/IncomeForm';
 import { Income, User } from '../types/income';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table';
 
 const IncomePage: React.FC = () => {
   const { user }: { user: User | null } = useAuth();
@@ -16,7 +24,11 @@ const IncomePage: React.FC = () => {
     const fetchIncomes = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get('/api/income');
+        const response = await axiosInstance.get('/api/income', {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        });
         setIncomes(response.data);
       } catch (err: any) {
         console.error('Error fetching incomes:', err);
@@ -30,6 +42,25 @@ const IncomePage: React.FC = () => {
       fetchIncomes();
     }
   }, [user]);
+
+  // Delete income function
+  const handleDelete = async (incomeId: string) => {
+    if (!window.confirm('Are you sure you want to delete this income record?')) {
+      return;
+    }
+
+    try {
+      await axiosInstance.delete(`/api/income/${incomeId}`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+      setIncomes(incomes.filter(income => income._id !== incomeId));
+    } catch (err: any) {
+      console.error('Error deleting income:', err);
+      setError('Failed to delete income. Please try again.');
+    }
+  };
 
   if (!user) {
     return (
@@ -68,7 +99,14 @@ const IncomePage: React.FC = () => {
 
           {/* Income List */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Your Income Records</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Your Income Records</h2>
+              {incomes.length > 0 && (
+                <div className="text-lg font-bold text-green-600">
+                  Total: ${incomes.reduce((sum, income) => sum + income.amount, 0).toFixed(2)}
+                </div>
+              )}
+            </div>
             
             {loading ? (
               <div className="text-center py-4">Loading incomes...</div>
@@ -77,34 +115,74 @@ const IncomePage: React.FC = () => {
                 No income records found. Add your first income entry!
               </div>
             ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {incomes.map((income) => (
-                  <div
-                    key={income._id}
-                    className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => setEditingIncome(income)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="font-medium">${income.amount.toFixed(2)}</div>
-                        <div className="text-sm text-gray-600">{income.category}</div>
-                        {income.description && (
-                          <div className="text-sm text-gray-500">{income.description}</div>
-                        )}
-                        <div className="text-xs text-gray-400">
+              <div className="max-h-96 overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Date Earned</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead>Recurring</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {incomes.map((income) => (
+                      <TableRow
+                        key={income._id}
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => setEditingIncome(income)}
+                      >
+                        <TableCell className="font-medium">
+                          ${income.amount.toFixed(2)}
+                        </TableCell>
+                        <TableCell>{income.category}</TableCell>
+                        <TableCell>
+                          {income.description || '-'}
+                        </TableCell>
+                        <TableCell>
                           {new Date(income.dateEarned).toLocaleDateString()}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {income.isRecurring && (
-                          <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {income.recurringFrequency}
+                        </TableCell>
+                        <TableCell>
+                          {income.source || '-'}
+                        </TableCell>
+                        <TableCell>
+                          {income.isRecurring ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                              {income.recurringFrequency}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">No</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingIncome(income);
+                              }}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(income._id);
+                              }}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Delete
+                            </button>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </div>

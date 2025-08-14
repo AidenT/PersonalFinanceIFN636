@@ -1,49 +1,17 @@
-import User, { IUser, IUserCreate, IUserSafe } from '../models/User';
+import User, { IUser } from '../models/User';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-
-// Define types for our data structures - using the IUser interface
-interface UserData {
-    _id?: string;
-    id?: string;
-    name: string;
-    email: string;
-    password?: string;
-    university?: string;
-    address?: string;
-    save?: () => Promise<UserData>;
-}
-
-interface UserResponseData {
-    id: string;
-    name: string;
-    email: string;
-    token: string;
-    university?: string;
-    address?: string;
-}
+import { 
+    UserResponseData, 
+    RegisterRequest, 
+    LoginRequest, 
+    UpdateProfileRequest,
+    ExpressResponse
+} from '../types/authTypes';
 
 interface ProfileResponseData {
     name: string;
     email: string;
-    university?: string;
-    address?: string;
-}
-
-interface LoginRequestData {
-    email: string;
-    password: string;
-}
-
-interface RegisterRequestData {
-    name: string;
-    email: string;
-    password: string;
-}
-
-interface UpdateProfileRequestData {
-    name?: string;
-    email?: string;
     university?: string;
     address?: string;
 }
@@ -56,17 +24,12 @@ interface ExpressRequest {
     };
 }
 
-interface ExpressResponse {
-    status: (code: number) => ExpressResponse;
-    json: (data: any) => void;
-}
-
 const generateToken = (id: string): string => {
     return jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '30d' });
 };
 
 const registerUser = async (req: ExpressRequest, res: ExpressResponse): Promise<void> => {
-    const { name, email, password }: RegisterRequestData = req.body;
+    const { name, email, password }: RegisterRequest = req.body;
     try {
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -88,7 +51,7 @@ const registerUser = async (req: ExpressRequest, res: ExpressResponse): Promise<
 };
 
 const loginUser = async (req: ExpressRequest, res: ExpressResponse): Promise<void> => {
-    const { email, password }: LoginRequestData = req.body;
+    const { email, password }: LoginRequest = req.body;
     try {
         const user: IUser | null = await User.findOne({ email });
         if (user && (await bcrypt.compare(password, user.password as string))) {
@@ -135,7 +98,7 @@ const updateUserProfile = async (req: ExpressRequest, res: ExpressResponse): Pro
             return;
         }
 
-        const { name, email, university, address }: UpdateProfileRequestData = req.body;
+        const { name, email, university, address }: UpdateProfileRequest = req.body;
         user.name = name || user.name;
         user.email = email || user.email;
         user.university = university || user.university;
