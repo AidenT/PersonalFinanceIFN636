@@ -2,7 +2,8 @@
 const mockIncomeModel = {
     find: require('sinon').stub(),
     create: require('sinon').stub(),
-    findById: require('sinon').stub()
+    findById: require('sinon').stub(),
+    findByIdAndDelete: require('sinon').stub()
 };
 
 // Mock all possible Income module paths
@@ -20,7 +21,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 
 // Now require the COMPILED controller after mocking Income
-const { getIncomes, addIncome, getIncomeById } = require('../dist/controllers/incomeController');
+const { getIncomes, addIncome, getIncomeById, updateIncome, deleteIncome } = require('../dist/controllers/incomeController');
 
 // Restore original require
 Module.prototype.require = originalRequire;
@@ -52,6 +53,7 @@ describe('Income Controller Tests - JavaScript/TypeScript Compatible', () => {
         mockIncomeModel.find.reset();
         mockIncomeModel.create.reset();
         mockIncomeModel.findById.reset();
+        mockIncomeModel.findByIdAndDelete.reset();
     });
 
     describe('getIncomes', () => {
@@ -301,6 +303,220 @@ describe('Income Controller Tests - JavaScript/TypeScript Compatible', () => {
             mockIncomeModel.findById.rejects(new Error(errorMessage));
 
             await getIncomeById(req, res);
+
+            expect(statusStub.calledWith(500)).to.be.true;
+            expect(jsonStub.calledWith({ message: errorMessage })).to.be.true;
+        });
+    });
+
+    describe('updateIncome', () => {
+        it('should update income successfully', async () => {
+            const mockIncomeDoc = {
+                _id: 'incomeId123',
+                userId: { toString: () => 'mockUserId123' },
+                amount: 1000,
+                description: 'Original description',
+                category: 'Salary',
+                source: 'Company',
+                isRecurring: false,
+                save: sinon.stub().resolves({
+                    _id: 'incomeId123',
+                    userId: 'mockUserId123',
+                    amount: 1500,
+                    description: 'Updated description',
+                    category: 'Freelance',
+                    source: 'Client',
+                    isRecurring: false
+                })
+            };
+
+            req.params.id = 'incomeId123';
+            req.body = {
+                amount: 1500,
+                description: 'Updated description',
+                category: 'Freelance',
+                source: 'Client'
+            };
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await updateIncome(req, res);
+
+            expect(mockIncomeDoc.save.calledOnce).to.be.true;
+            expect(mockIncomeDoc.amount).to.equal(1500);
+            expect(mockIncomeDoc.description).to.equal('Updated description');
+            expect(mockIncomeDoc.category).to.equal('Freelance');
+            expect(mockIncomeDoc.source).to.equal('Client');
+            expect(res.json.calledOnce).to.be.true;
+        });
+
+        it('should return error if income not found for update', async () => {
+            req.params.id = 'nonexistentId';
+            req.body = { amount: 1500 };
+            mockIncomeModel.findById.resolves(null);
+
+            await updateIncome(req, res);
+
+            expect(statusStub.calledWith(404)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Income not found' })).to.be.true;
+        });
+
+        it('should return error if user not authorized to update', async () => {
+            const mockIncomeDoc = {
+                userId: { toString: () => 'differentUserId' }
+            };
+
+            req.params.id = 'incomeId123';
+            req.body = { amount: 1500 };
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await updateIncome(req, res);
+
+            expect(statusStub.calledWith(403)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Not authorized to update this income' })).to.be.true;
+        });
+
+        it('should return error for invalid amount update', async () => {
+            const mockIncomeDoc = {
+                userId: { toString: () => 'mockUserId123' }
+            };
+
+            req.params.id = 'incomeId123';
+            req.body = { amount: -100 };
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await updateIncome(req, res);
+
+            expect(statusStub.calledWith(400)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Amount must be greater than 0' })).to.be.true;
+        });
+
+        it('should update recurring income fields correctly', async () => {
+            const mockIncomeDoc = {
+                _id: 'incomeId123',
+                userId: { toString: () => 'mockUserId123' },
+                amount: 1000,
+                isRecurring: false,
+                recurringFrequency: undefined,
+                startDate: undefined,
+                save: sinon.stub().resolves({
+                    _id: 'incomeId123',
+                    userId: 'mockUserId123',
+                    amount: 1000,
+                    isRecurring: true,
+                    recurringFrequency: 'Monthly',
+                    startDate: '2024-01-01'
+                })
+            };
+
+            req.params.id = 'incomeId123';
+            req.body = {
+                isRecurring: true,
+                recurringFrequency: 'Monthly',
+                startDate: '2024-01-01'
+            };
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await updateIncome(req, res);
+
+            expect(mockIncomeDoc.isRecurring).to.be.true;
+            expect(mockIncomeDoc.recurringFrequency).to.equal('Monthly');
+            expect(mockIncomeDoc.startDate).to.equal('2024-01-01');
+            expect(mockIncomeDoc.save.calledOnce).to.be.true;
+        });
+
+        it('should clear recurring fields when isRecurring is set to false', async () => {
+            const mockIncomeDoc = {
+                _id: 'incomeId123',
+                userId: { toString: () => 'mockUserId123' },
+                amount: 1000,
+                isRecurring: true,
+                recurringFrequency: 'Monthly',
+                startDate: '2024-01-01',
+                save: sinon.stub().resolves({})
+            };
+
+            req.params.id = 'incomeId123';
+            req.body = { isRecurring: false };
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await updateIncome(req, res);
+
+            expect(mockIncomeDoc.isRecurring).to.be.false;
+            expect(mockIncomeDoc.recurringFrequency).to.be.undefined;
+            expect(mockIncomeDoc.startDate).to.be.undefined;
+            expect(mockIncomeDoc.save.calledOnce).to.be.true;
+        });
+
+        it('should handle database errors during update', async () => {
+            const errorMessage = 'Database update failed';
+            const mockIncomeDoc = {
+                userId: { toString: () => 'mockUserId123' },
+                save: sinon.stub().rejects(new Error(errorMessage))
+            };
+
+            req.params.id = 'incomeId123';
+            req.body = { amount: 1500 };
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await updateIncome(req, res);
+
+            expect(statusStub.calledWith(500)).to.be.true;
+            expect(jsonStub.calledWith({ message: errorMessage })).to.be.true;
+        });
+    });
+
+    describe('deleteIncome', () => {
+        it('should delete income successfully', async () => {
+            const mockIncomeDoc = {
+                _id: 'incomeId123',
+                userId: { toString: () => 'mockUserId123' },
+                remove: sinon.stub().resolves()
+            };
+
+            req.params.id = 'incomeId123';
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await deleteIncome(req, res);
+
+            expect(mockIncomeDoc.remove.calledOnce).to.be.true;
+            expect(res.json.calledWith({ message: 'Income deleted successfully' })).to.be.true;
+        });
+
+        it('should return error if income not found for deletion', async () => {
+            req.params.id = 'nonexistentId';
+            mockIncomeModel.findById.resolves(null);
+
+            await deleteIncome(req, res);
+
+            expect(statusStub.calledWith(404)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Income not found' })).to.be.true;
+        });
+
+        it('should return error if user not authorized to delete', async () => {
+            const mockIncomeDoc = {
+                userId: { toString: () => 'differentUserId' }
+            };
+
+            req.params.id = 'incomeId123';
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await deleteIncome(req, res);
+
+            expect(statusStub.calledWith(403)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Not authorized to delete this income' })).to.be.true;
+        });
+
+        it('should handle database errors during deletion', async () => {
+            const errorMessage = 'Database deletion failed';
+            const mockIncomeDoc = {
+                userId: { toString: () => 'mockUserId123' },
+                remove: sinon.stub().rejects(new Error(errorMessage))
+            };
+
+            req.params.id = 'incomeId123';
+            mockIncomeModel.findById.resolves(mockIncomeDoc);
+
+            await deleteIncome(req, res);
 
             expect(statusStub.calledWith(500)).to.be.true;
             expect(jsonStub.calledWith({ message: errorMessage })).to.be.true;

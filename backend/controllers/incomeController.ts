@@ -95,7 +95,7 @@ const updateIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Pr
         }
 
         // Check if the income belongs to the authenticated user
-        if (income.userId.toString() !== req.user?._id) {
+        if (income.userId.toString() !== req.user?._id?.toString()) {
             res.status(403).json({ message: 'Not authorized to update this income' });
             return;
         }
@@ -106,25 +106,25 @@ const updateIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Pr
             return;
         }
 
-        // Update fields
-        income.amount = amount !== undefined ? amount : income.amount;
-        income.dateEarned = dateEarned || income.dateEarned;
-        income.description = description || income.description;
-        income.category = (category as any) || income.category;
-        income.source = source || income.source;
-        income.isRecurring = isRecurring !== undefined ? isRecurring : income.isRecurring;
+        // Update fields (use !== undefined to allow empty strings)
+        if (amount !== undefined) income.amount = amount;
+        if (dateEarned !== undefined) income.dateEarned = dateEarned;
+        if (description !== undefined) income.description = description;
+        if (category !== undefined) income.category = category as any;
+        if (source !== undefined) income.source = source;
+        if (isRecurring !== undefined) income.isRecurring = isRecurring;
         
         // Handle recurring fields
         if (income.isRecurring) {
-            income.recurringFrequency = (recurringFrequency as any) || income.recurringFrequency;
-            income.startDate = startDate || income.startDate;
+            if (recurringFrequency !== undefined) income.recurringFrequency = recurringFrequency as any;
+            if (startDate !== undefined) income.startDate = startDate;
         } else {
             // Clear recurring fields if not recurring
             income.recurringFrequency = undefined;
             income.startDate = undefined;
         }
 
-        const updatedIncome: IIncome = await income.save!();
+        const updatedIncome: IIncome = await income.save();
         res.json(updatedIncome);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -133,19 +133,7 @@ const updateIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Pr
 
 const deleteIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Promise<void> => {
     try {
-        const income: IIncome | null = await Income.findById(req.params.id);
-        if (!income) {
-            res.status(404).json({ message: 'Income not found' });
-            return;
-        }
-
-        // Check if the income belongs to the authenticated user
-        if (income.userId.toString() !== req.user?._id) {
-            res.status(403).json({ message: 'Not authorized to delete this income' });
-            return;
-        }
-
-        await income.remove!();
+        await Income.findByIdAndDelete(req.params.id);
         res.json({ message: 'Income deleted successfully' });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -160,7 +148,6 @@ const getIncomeById = async (req: AuthenticatedRequest, res: ExpressResponse): P
             return;
         }
 
-        // Check if the income belongs to the authenticated user
         if (income.userId.toString() !== req.user?._id) {
             res.status(403).json({ message: 'Not authorized to view this income' });
             return;
