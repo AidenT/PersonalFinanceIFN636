@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../axiosConfig';
-import { Income, IncomeFormData, User } from '../types/income';
+import { useAuth } from '../../context/AuthContext';
+import axiosInstance from '../../axiosConfig';
+import { Income, IncomeFormData, User } from '../../types/income';
 
 interface IncomeFormProps {
   incomes: Income[];

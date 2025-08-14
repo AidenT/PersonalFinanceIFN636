@@ -1,5 +1,5 @@
 import React from 'react';
-import { Income } from '../types/income';
+import { Income } from '../../types/income';
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from '../ui/table';
 
 interface IncomeTableProps {
   incomes: Income[];

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
-import IncomeForm from '../components/IncomeForm';
-import IncomeTable from '../components/IncomeTable';
+import IncomeForm from '../components/Income/IncomeForm';
+import IncomeTable from '../components/Income/IncomeTable';
 import { Income, User } from '../types/income';
 
 const IncomePage: React.FC = () => {

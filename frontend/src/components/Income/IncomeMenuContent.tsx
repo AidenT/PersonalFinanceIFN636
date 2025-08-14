@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { NavigationMenuLink } from './navigation-menu';
+import { NavigationMenuLink } from '../NavigationBar/navigation-menu';
 
 const IncomeMenuContent = () => {
   return (

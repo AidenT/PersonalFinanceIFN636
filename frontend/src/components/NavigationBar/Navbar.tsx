@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,7 +8,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "./navigation-menu";
-import IncomeMenuContent from './IncomeMenuContent';
+import IncomeMenuContent from '../Income/IncomeMenuContent';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
