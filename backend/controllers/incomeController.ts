@@ -1,66 +1,9 @@
 import Income, { IIncome } from '../models/Income';
-
-// Define TypeScript interfaces for income data
-interface IncomeData {
-    _id?: string;
-    userId: string;
-    amount: number;
-    dateEarned: Date;
-    description: string;
-    category: string;
-    source: string;
-    isRecurring: boolean;
-    recurringFrequency?: string;
-    startDate?: Date;
-    createdAt: Date;
-    save?: () => Promise<IncomeData>;
-    remove?: () => Promise<void>;
-}
-
-interface CreateIncomeRequest {
-    amount: number;
-    dateEarned?: Date;
-    description: string;
-    category: string;
-    source: string;
-    isRecurring?: boolean;
-    recurringFrequency?: string;
-    startDate?: Date;
-}
-
-interface UpdateIncomeRequest {
-    amount?: number;
-    dateEarned?: Date;
-    description?: string;
-    category?: string;
-    source?: string;
-    isRecurring?: boolean;
-    recurringFrequency?: string;
-    startDate?: Date;
-}
-
-// Express request/response types
-interface AuthenticatedRequest {
-    body: any;
-    params: {
-        id: string;
-        [key: string]: string;
-    };
-    user?: {
-        _id: string;
-        name: string;
-        email: string;
-        university?: string;
-        address?: string;
-        createdAt: Date;
-        updatedAt: Date;
-    };
-}
-
-interface ExpressResponse {
-    status: (code: number) => ExpressResponse;
-    json: (data: any) => void;
-}
+import { AuthenticatedRequest, ExpressResponse } from '../types/authTypes';
+import { 
+    CreateIncomeRequest, 
+    UpdateIncomeRequest 
+} from '../types/incomeTypes';
 
 const getIncomes = async (req: AuthenticatedRequest, res: ExpressResponse): Promise<void> => {
     try {

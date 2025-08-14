@@ -1,39 +1,6 @@
 const jwt = require('jsonwebtoken');
 import User from '../models/User';
-
-// Define interfaces for our middleware
-interface UserPayload {
-    id: string;
-    iat?: number;
-    exp?: number;
-}
-
-interface AuthenticatedUser {
-    _id: string;
-    name: string;
-    email: string;
-    university?: string;
-    address?: string;
-    createdAt: Date;
-    updatedAt: Date;
-    // password is excluded by select('-password')
-}
-
-// Extend Express Request interface to include user property
-interface AuthenticatedRequest {
-    headers: {
-        authorization?: string;
-        [key: string]: any;
-    };
-    user?: AuthenticatedUser;
-    [key: string]: any;
-}
-
-// Express response interface (simplified)
-interface ExpressResponse {
-    status: (code: number) => ExpressResponse;
-    json: (data: any) => void;
-}
+import { UserData, AuthenticatedRequest, ExpressResponse, UserPayload } from '../types/authTypes';
 
 // Express next function interface
 interface NextFunction {
@@ -59,7 +26,7 @@ const protect = async (req: AuthenticatedRequest, res: ExpressResponse, next: Ne
                 return;
             }
             
-            req.user = user as AuthenticatedUser;
+            req.user = user as UserData;
             
             next();
         } catch (error: any) {
