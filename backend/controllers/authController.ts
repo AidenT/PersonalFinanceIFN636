@@ -1,10 +1,11 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+import User, { IUser, IUserCreate, IUserSafe } from '../models/User';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
-// Define types for our data structures
+// Define types for our data structures - using the IUser interface
 interface UserData {
-    id: string;
+    _id?: string;
+    id?: string;
     name: string;
     email: string;
     password?: string;
@@ -73,12 +74,12 @@ const registerUser = async (req: ExpressRequest, res: ExpressResponse): Promise<
             return;
         }
 
-        const user: UserData = await User.create({ name, email, password });
+        const user: IUser = await User.create({ name, email, password });
         const response: UserResponseData = {
-            id: user.id, 
+            id: user._id.toString(), 
             name: user.name, 
             email: user.email, 
-            token: generateToken(user.id) 
+            token: generateToken(user._id.toString()) 
         };
         res.status(201).json(response);
     } catch (error: any) {
@@ -89,13 +90,13 @@ const registerUser = async (req: ExpressRequest, res: ExpressResponse): Promise<
 const loginUser = async (req: ExpressRequest, res: ExpressResponse): Promise<void> => {
     const { email, password }: LoginRequestData = req.body;
     try {
-        const user: UserData = await User.findOne({ email });
+        const user: IUser | null = await User.findOne({ email });
         if (user && (await bcrypt.compare(password, user.password as string))) {
             const response: UserResponseData = {
-                id: user.id, 
+                id: user._id.toString(), 
                 name: user.name, 
                 email: user.email, 
-                token: generateToken(user.id) 
+                token: generateToken(user._id.toString()) 
             };
             res.json(response);
         } else {
@@ -108,7 +109,7 @@ const loginUser = async (req: ExpressRequest, res: ExpressResponse): Promise<voi
 
 const getProfile = async (req: ExpressRequest, res: ExpressResponse): Promise<void> => {
     try {
-        const user: UserData = await User.findById(req.user?.id);
+        const user: IUser | null = await User.findById(req.user?.id);
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
@@ -128,7 +129,7 @@ const getProfile = async (req: ExpressRequest, res: ExpressResponse): Promise<vo
 
 const updateUserProfile = async (req: ExpressRequest, res: ExpressResponse): Promise<void> => {
     try {
-        const user: UserData = await User.findById(req.user?.id);
+        const user: IUser | null = await User.findById(req.user?.id);
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
@@ -140,14 +141,14 @@ const updateUserProfile = async (req: ExpressRequest, res: ExpressResponse): Pro
         user.university = university || user.university;
         user.address = address || user.address;
 
-        const updatedUser: UserData = await user.save!();
+        const updatedUser: IUser = await user.save();
         const response: UserResponseData = {
-            id: updatedUser.id, 
+            id: updatedUser._id.toString(), 
             name: updatedUser.name, 
             email: updatedUser.email, 
             university: updatedUser.university, 
             address: updatedUser.address, 
-            token: generateToken(updatedUser.id) 
+            token: generateToken(updatedUser._id.toString()) 
         };
         res.json(response);
     } catch (error: any) {
