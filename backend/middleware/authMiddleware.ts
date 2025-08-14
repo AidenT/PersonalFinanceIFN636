@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+import User from '../models/User';
 
 // Define interfaces for our middleware
 interface UserPayload {
@@ -8,11 +9,13 @@ interface UserPayload {
 }
 
 interface AuthenticatedUser {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     university?: string;
     address?: string;
+    createdAt: Date;
+    updatedAt: Date;
     // password is excluded by select('-password')
 }
 
@@ -37,9 +40,6 @@ interface NextFunction {
     (): void;
 }
 
-// Import User model
-const User = require('../models/User');
-
 const protect = async (req: AuthenticatedRequest, res: ExpressResponse, next: NextFunction): Promise<void> => {
     let token: string | undefined;
 
@@ -52,7 +52,14 @@ const protect = async (req: AuthenticatedRequest, res: ExpressResponse, next: Ne
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as UserPayload;
             
             // Get user from token and attach to request
-            req.user = await User.findById(decoded.id).select('-password') as AuthenticatedUser;
+            const user = await User.findById(decoded.id).select('-password');
+            
+            if (!user) {
+                res.status(401).json({ message: 'Not authorized, user not found' });
+                return;
+            }
+            
+            req.user = user as AuthenticatedUser;
             
             next();
         } catch (error: any) {
