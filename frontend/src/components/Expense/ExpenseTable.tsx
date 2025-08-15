@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '../ui/table';
 import { IExpense } from '../../../../backend/models/Expense';
+import { EXPENSE_CATEGORIES } from '../../types/expense';
 
 interface ExpenseTableProps {
   expenses: IExpense[];
@@ -22,22 +23,70 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Filter expenses based on selected category
+  const filteredExpenses = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return expenses;
+    }
+    return expenses.filter(expense => expense.category === selectedCategory);
+  }, [expenses, selectedCategory]);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+  };
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Your Expense Records</h2>
         {expenses.length > 0 && (
           <div className="text-lg font-bold text-red-600">
-            Total: ${expenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2)}
+            Total: ${filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2)}
+            {selectedCategory !== 'all' && (
+              <span className="text-sm font-normal text-gray-600 ml-2">
+                (filtered)
+              </span>
+            )}
           </div>
         )}
+      </div>
+
+      {/* Category Filter */}
+      <div className="mb-4">
+        <div className="flex items-center gap-4">
+          <label htmlFor="categoryFilter" className="text-sm font-medium text-gray-700">
+            Filter by Category:
+          </label>
+          <select
+            id="categoryFilter"
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="all">All Categories</option>
+            {Object.entries(EXPENSE_CATEGORIES).map(([key, value]) => (
+              <option key={key} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+          {selectedCategory !== 'all' && (
+            <span className="text-sm text-gray-600">
+              Showing {filteredExpenses.length} of {expenses.length} expenses
+            </span>
+          )}
+        </div>
       </div>
       
       {loading ? (
         <div className="text-center py-4">Loading expenses...</div>
-      ) : expenses.length === 0 ? (
+      ) : filteredExpenses.length === 0 ? (
         <div className="text-center py-4 text-gray-500">
-          No expense records found. Add your first expense entry!
+          {selectedCategory === 'all' 
+            ? 'No expense records found. Add your first expense entry!'
+            : `No expenses found for category "${selectedCategory}". Try selecting a different category.`
+          }
         </div>
       ) : (
         <div className="max-h-96 overflow-y-auto">
@@ -54,7 +103,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenses.map((expense) => (
+              {filteredExpenses.map((expense) => (
                 <TableRow
                   key={expense._id}
                   className="hover:bg-gray-50 cursor-pointer"

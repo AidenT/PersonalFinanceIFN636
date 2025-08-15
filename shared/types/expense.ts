@@ -1,4 +1,4 @@
-// Shared expense constants and types (copied from shared for CRA compatibility)
+// Shared expense constants and types
 
 export const EXPENSE_CATEGORIES = {
     HOUSING: 'Housing',
@@ -25,22 +25,14 @@ export const RECURRING_FREQUENCIES = {
 export type ExpenseCategory = typeof EXPENSE_CATEGORIES[keyof typeof EXPENSE_CATEGORIES];
 export type RecurringFrequency = typeof RECURRING_FREQUENCIES[keyof typeof RECURRING_FREQUENCIES];
 
-// Expense form data (for frontend forms)
-export interface ExpenseFormData {
-    amount: string; // String for form inputs
-    dateSpent: string;
-    description: string;
+// Base expense interface (shared between frontend and backend)
+export interface BaseExpense {
+    amount: number;
+    dateSpent: Date | string; // Allow both Date and string for API compatibility
+    description?: string;
     category: ExpenseCategory;
-    merchant: string;
+    merchant?: string;
     isRecurring: boolean;
     recurringFrequency?: RecurringFrequency;
-    startDate?: string;
+    startDate?: Date | string; // Allow both Date and string for API compatibility
 }
-
-export const isValidExpenseCategory = (category: string): category is ExpenseCategory => {
-    return Object.values(EXPENSE_CATEGORIES).includes(category as ExpenseCategory);
-};
-
-export const isValidRecurringFrequency = (frequency: string): frequency is RecurringFrequency => {
-    return Object.values(RECURRING_FREQUENCIES).includes(frequency as RecurringFrequency);
-};

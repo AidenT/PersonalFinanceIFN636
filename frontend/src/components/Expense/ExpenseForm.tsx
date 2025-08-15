@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
 import { IExpense } from '../../../../backend/models/Expense';
 import { IAuthenticatedUser } from '../../../../backend/models/User';
-import { ExpenseFormData } from '../../types/expense';
+import { EXPENSE_CATEGORIES, RECURRING_FREQUENCIES, ExpenseFormData } from '../../types/expense';
 
 interface ExpenseFormProps {
   expenses: IExpense[];
@@ -148,10 +148,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expenses, setExpenses, editin
         />
       </div>
 
-      {/* Date Earned Input */}
+      {/* Date Spent Input */}
       <div className="mb-4">
         <label htmlFor="dateSpent" className="block text-sm font-medium text-gray-700 mb-2">
-          Date Earned *
+          Date Spent *
         </label>
         <input
           id="dateSpent"
@@ -191,12 +191,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expenses, setExpenses, editin
           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
           required
         >
-          <option value="Salary">Salary</option>
-          <option value="Freelance">Freelance</option>
-          <option value="Investment">Investment</option>
-          <option value="Business">Business</option>
-          <option value="Gift">Gift</option>
-          <option value="Other">Other</option>
+          {Object.entries(EXPENSE_CATEGORIES).map(([key, value]) => (
+            <option key={key} value={value}>
+              {value}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -243,11 +242,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expenses, setExpenses, editin
             required={formData.isRecurring}
           >
             <option value="">Select frequency...</option>
-            <option value="Weekly">Weekly</option>
-            <option value="Bi-weekly">Bi-weekly</option>
-            <option value="Monthly">Monthly</option>
-            <option value="Quarterly">Quarterly</option>
-            <option value="Yearly">Yearly</option>
+            {Object.entries(RECURRING_FREQUENCIES).map(([key, value]) => (
+              <option key={key} value={value}>
+                {value}
+              </option>
+            ))}
           </select>
         </div>
       )}
