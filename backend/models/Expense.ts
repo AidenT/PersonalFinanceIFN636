@@ -1,42 +1,9 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-
-// Constants for dropdowns and validation
-export const EXPENSE_CATEGORIES = [
-    'Housing',
-    'Transportation',
-    'Food',
-    'Healthcare',
-    'Entertainment',
-    'Shopping',
-    'Bills',
-    'Education',
-    'Travel',
-    'Other'
-] as const;
-
-export const RECURRING_FREQUENCIES = [
-    'Weekly',
-    'Bi-weekly',
-    'Monthly',
-    'Quarterly',
-    'Yearly'
-] as const;
-
-// Utility types
-export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
-export type RecurringFrequency = typeof RECURRING_FREQUENCIES[number];
-
-// Shared Expense types
-export interface BaseExpense {
-    amount: number;
-    dateSpent: Date;
-    description?: string;
-    category: ExpenseCategory;
-    merchant?: string;
-    isRecurring: boolean;
-    recurringFrequency?: RecurringFrequency;
-    startDate?: Date;
-}
+import { 
+    EXPENSE_CATEGORIES, 
+    RECURRING_FREQUENCIES,
+    BaseExpense
+} from '../../shared/types/expense';
 
 // Mongoose Document interface for Expense
 export interface IExpense extends Document, BaseExpense {
@@ -67,7 +34,7 @@ const expenseSchema = new Schema<IExpense>({
     category: { 
         type: String, 
         required: true,
-        enum: EXPENSE_CATEGORIES,
+        enum: Object.values(EXPENSE_CATEGORIES),
         default: 'Other'
     },
     merchant: { 
@@ -79,7 +46,7 @@ const expenseSchema = new Schema<IExpense>({
     },
     recurringFrequency: { 
         type: String,
-        enum: RECURRING_FREQUENCIES,
+        enum: Object.values(RECURRING_FREQUENCIES),
         required: function(this: IExpense) {
             return this.isRecurring;
         }

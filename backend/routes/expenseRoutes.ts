@@ -1,5 +1,5 @@
 import express from 'express';
-import { getExpenses, getExpenseById } from '../controllers/expenseController';
+import { getExpenses, getExpenseById, addExpense, deleteExpense } from '../controllers/expenseController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -8,10 +8,10 @@ router.get('/', protect, getExpenses);
 
 router.get('/:id', protect, getExpenseById);
 
-// router.post('/addExpense', protect, addExpense);
+router.post('/addExpense', protect, addExpense);
 
-// router.put('/:id', protect, updateExpense);
+//router.put('/:id', protect, updateExpense);
 
-// router.delete('/:id', protect, deleteExpense);
+router.delete('/:id', protect, deleteExpense);
 
 export default router;
