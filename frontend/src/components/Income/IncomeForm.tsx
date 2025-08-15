@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../axiosConfig';
-import { Income, IncomeFormData, User } from '../types/income';
+import { useAuth } from '../../context/AuthContext';
+import axiosInstance from '../../axiosConfig';
+import { IIncome } from '../../../../backend/models/Income';
+import { IAuthenticatedUser } from '../../../../backend/models/User';
+import { IncomeFormData } from '../../types/income';
 
 interface IncomeFormProps {
-  incomes: Income[];
-  setIncomes: React.Dispatch<React.SetStateAction<Income[]>>;
-  editingIncome: Income | null;
-  setEditingIncome: React.Dispatch<React.SetStateAction<Income | null>>;
+  incomes: IIncome[];
+  setIncomes: React.Dispatch<React.SetStateAction<IIncome[]>>;
+  editingIncome: IIncome | null;
+  setEditingIncome: React.Dispatch<React.SetStateAction<IIncome | null>>;
 }
 
 const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingIncome, setEditingIncome }) => {
-  const { user }: { user: User | null } = useAuth();
+  const { user }: { user: IAuthenticatedUser | null } = useAuth();
   const [formData, setFormData] = useState<IncomeFormData>({ 
     amount: '',
     dateEarned: new Date().toISOString().split('T')[0], // Today's date
@@ -27,13 +29,13 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
     if (editingIncome) {
       setFormData({
         amount: editingIncome.amount.toString(),
-        dateEarned: editingIncome.dateEarned.split('T')[0], // Convert to YYYY-MM-DD format
+        dateEarned: editingIncome.dateEarned.toString().split('T')[0], // Convert to YYYY-MM-DD format
         description: editingIncome.description || '',
         category: editingIncome.category,
         source: editingIncome.source || '',
         isRecurring: editingIncome.isRecurring,
         recurringFrequency: editingIncome.recurringFrequency,
-        startDate: editingIncome.startDate ? editingIncome.startDate.split('T')[0] : undefined
+        startDate: editingIncome.startDate ? editingIncome.startDate.toString().split('T')[0] : undefined
       });
     } else {
       setFormData({ 
@@ -90,12 +92,12 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
       };
 
       if (editingIncome) {
-        const response = await axiosInstance.put<Income>(`/api/income/${editingIncome._id}`, submitData, {
+        const response = await axiosInstance.put<IIncome>(`/api/income/${editingIncome._id}`, submitData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setIncomes(incomes.map((income: Income) => (income._id === response.data._id ? response.data : income)));
+        setIncomes(incomes.map((income: IIncome) => (income._id === response.data._id ? response.data : income)));
       } else {
-        const response = await axiosInstance.post<Income>('/api/income/addIncome', submitData, {
+        const response = await axiosInstance.post<IIncome>('/api/income/addIncome', submitData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setIncomes([...incomes, response.data]);

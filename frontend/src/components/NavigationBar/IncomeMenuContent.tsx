@@ -14,10 +14,10 @@ const IncomeMenuContent = () => {
                   </Link>
                 </NavigationMenuLink>
                 <NavigationMenuLink asChild>
-                  <Link to="/income">
-                    <div className="font-medium">Update or Remove Income</div>
+                  <Link to="/expense">
+                    <div className="font-medium">Add Expense</div>
                     <div className="text-muted-foreground">
-                      Changes to your income? Make sure you update them here.
+                      Add one off or recurring expenses.
                     </div>
                   </Link>
                 </NavigationMenuLink>

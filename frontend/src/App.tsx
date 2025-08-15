@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import Navbar from './components/NavigationBar/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import IncomePage from './pages/Income';
+import ExpensePage from './pages/Expense';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 
@@ -20,6 +21,7 @@ function AppContent() {
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/income" element={<IncomePage />} />
+        <Route path="/expense" element={<ExpensePage />} />
       </Routes>
     </Router>
   );

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
-import IncomeForm from '../components/IncomeForm';
-import IncomeTable from '../components/IncomeTable';
-import { Income, User } from '../types/income';
+import IncomeForm from '../components/Income/IncomeForm';
+import IncomeTable from '../components/Income/IncomeTable';
+import { IIncome } from '../../../backend/models/Income';
+import { IAuthenticatedUser } from '../../../backend/models/User';
 
 const IncomePage: React.FC = () => {
-  const { user }: { user: User | null } = useAuth();
-  const [incomes, setIncomes] = useState<Income[]>([]);
-  const [editingIncome, setEditingIncome] = useState<Income | null>(null);
+  const { user }: { user: IAuthenticatedUser | null } = useAuth();
+  const [incomes, setIncomes] = useState<IIncome[]>([]);
+  const [editingIncome, setEditingIncome] = useState<IIncome | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

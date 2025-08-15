@@ -9,9 +9,3 @@ export interface ApiError {
     message: string;
     status: number;
 }
-
-// Form validation types
-export interface ValidationError {
-    field: string;
-    message: string;
-}

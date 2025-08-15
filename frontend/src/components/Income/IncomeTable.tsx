@@ -1,5 +1,5 @@
 import React from 'react';
-import { Income } from '../types/income';
+import { IIncome } from '../../../../backend/models/Income';
 import {
   Table,
   TableBody,
@@ -7,12 +7,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from '../ui/table';
 
 interface IncomeTableProps {
-  incomes: Income[];
+  incomes: IIncome[];
   loading: boolean;
-  onEdit: (income: Income) => void;
+  onEdit: (income: IIncome) => void;
   onDelete: (incomeId: string) => void;
 }
 

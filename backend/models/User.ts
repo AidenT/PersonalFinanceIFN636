@@ -32,6 +32,10 @@ export interface IUserSafe {
     updatedAt: Date;
 }
 
+export interface IAuthenticatedUser extends IUser {
+    token: string;
+}
+
 // Mongoose schema definition
 const userSchema = new Schema<IUser>({
     name: { 

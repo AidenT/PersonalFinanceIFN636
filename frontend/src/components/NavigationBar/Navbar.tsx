@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -28,14 +28,14 @@ const Navbar = () => {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Income</NavigationMenuTrigger>
+            <NavigationMenuTrigger>Finances</NavigationMenuTrigger>
             <NavigationMenuContent className='bg-white p-4 rounded-md shadow-sm'>
               <IncomeMenuContent />
             </NavigationMenuContent>
           </NavigationMenuItem>
 
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Expenses</NavigationMenuTrigger>
+            <NavigationMenuTrigger>Budget</NavigationMenuTrigger>
             <NavigationMenuContent className='bg-white p-4 rounded-md shadow-sm'>
               <IncomeMenuContent />
             </NavigationMenuContent>
