@@ -6,15 +6,36 @@
 * Login
 * Logout
 * Update profile
+* Add Income
+* View Income
+* Update Income Entry
+* Delete Income Entry
+* Add Expense
+* View Expense
+* Update Expense
+* Delete Expense
 
 
 This application utilized the provided template which can be found at https://github.com/rajuiit/taskmanagerv0.3 to accelerate development.
 
----
+**Running the application locally:**
+Ensure the axiosConfig.jsx has the "localUrl" uncommented and the "live url" commented out (Also check the port matches up with server.ts!)
+In the backend directory run "yarn install" then "yarn run build" - This installs all packages then includes tsc to compile the typescript to javascript
+In the frontend directory do the same once again to install all packages and compile the typescript to javascript
+In the root direct run "npm run start" everything will start as expected. Feel free to contact me if you run into any issues!
 
-**Prerequisite:** Please install the following software and create account in following web tools** **
+---
+**Developer workflow:**
+Please have a look at the JIRA for current and future work items at: https://aidentaylor1998.atlassian.net/jira/software/projects/PFA/summary.
+Create a branch for the user story and a separate branh off of the user story branch for subtasks as merging into main kicks of the CI/CD pipeline.
+Typescript has been utilized but types are currently not shared between backend and frontend due to the Create-React-App template. This will be addressed with PFA-80 https://aidentaylor1998.atlassian.net/browse/PFA-80?atlOrigin=eyJpIjoiNTg3ODA1ODM3MTk3NGE1MjkyNWZmODkwZDA3ODlhMDciLCJwIjoiaiJ9
+Until this is done, make sure type files are synchronized for backend and front end and run "npx tsc" or "yarn run build" to compile the typescript to javascript for the build.
+Tests are on the compiled javascript so make sure you compile any changes before you run "npm test"
+
+**Prerequisite:** Tools used to create this project** **
 
 * **Nodejs [**[https://nodejs.org/en](https://nodejs.org/en)]** **
+* **Typescript [**[https://www.typescriptlang.org/](https://www.typescriptlang.org/)]** **
 * **Git [**[https://git-scm.com/](https://git-scm.com/)]** **
 * **VS code editor** [[https://code.visualstudio.com/](https://code.visualstudio.com/)]** **
 * **MongoDB Account** [[https://account.mongodb.com/account/login](https://account.mongodb.com/account/login)]** - In tutorial, we have also showed how can you create account and database: follow step number 2.**
