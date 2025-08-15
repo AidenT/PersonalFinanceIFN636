@@ -57,17 +57,17 @@ const addExpense = async (req: AuthenticatedRequest, res: ExpressResponse): Prom
             return;
         }
 
-        // Validate recurring income fields
+        // Validate recurring expense fields
         if (isRecurring && !recurringFrequency) {
             res.status(400).json({ 
-                message: 'Recurring frequency is required for recurring income' 
+                message: 'Recurring frequency is required for recurring expenses' 
             });
             return;
         }
 
         if (isRecurring && !startDate) {
             res.status(400).json({ 
-                message: 'Start date is required for recurring income' 
+                message: 'Start date is required for recurring expenses' 
             });
             return;
         }

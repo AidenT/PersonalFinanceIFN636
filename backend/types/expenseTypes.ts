@@ -1,5 +1,5 @@
 // Import types and constants from Expense model
-import { ExpenseCategory, RecurringFrequency } from '../../shared/types/expense';
+import { ExpenseCategory, RecurringFrequency } from '../models/Expense';
 
 // Expense-related types
 export interface ExpenseData {
