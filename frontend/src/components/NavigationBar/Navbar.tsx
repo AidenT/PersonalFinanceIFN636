@@ -8,7 +8,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "./navigation-menu";
-import IncomeMenuContent from '../Income/IncomeMenuContent';
+import IncomeMenuContent from './IncomeMenuContent';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -28,14 +28,14 @@ const Navbar = () => {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Income</NavigationMenuTrigger>
+            <NavigationMenuTrigger>Finances</NavigationMenuTrigger>
             <NavigationMenuContent className='bg-white p-4 rounded-md shadow-sm'>
               <IncomeMenuContent />
             </NavigationMenuContent>
           </NavigationMenuItem>
 
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Expenses</NavigationMenuTrigger>
+            <NavigationMenuTrigger>Budget</NavigationMenuTrigger>
             <NavigationMenuContent className='bg-white p-4 rounded-md shadow-sm'>
               <IncomeMenuContent />
             </NavigationMenuContent>

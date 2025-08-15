@@ -1,15 +1,35 @@
-//Attempting to use typescript in models to test how this is to work with
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// Shared Income types - keep synchronized with frontend
+// Constants for dropdowns and validation
+export const INCOME_CATEGORIES = [
+    'Salary',
+    'Freelance',
+    'Investment',
+    'Business',
+    'Gift',
+    'Other'
+] as const;
+
+export const RECURRING_FREQUENCIES = [
+    'Weekly',
+    'Bi-weekly',
+    'Monthly',
+    'Quarterly',
+    'Yearly'
+] as const;
+
+// Utility types
+export type IncomeCategory = typeof INCOME_CATEGORIES[number];
+export type RecurringFrequency = typeof RECURRING_FREQUENCIES[number];
+
 export interface BaseIncome {
     amount: number;
     dateEarned: Date;
     description?: string;
-    category: 'Salary' | 'Freelance' | 'Investment' | 'Business' | 'Gift' | 'Other';
+    category: IncomeCategory;
     source?: string;
     isRecurring: boolean;
-    recurringFrequency?: 'Weekly' | 'Bi-weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
+    recurringFrequency?: RecurringFrequency;
     startDate?: Date;
 }
 
@@ -42,8 +62,8 @@ const incomeSchema = new Schema<IIncome>({
     category: { 
         type: String, 
         required: true,
-        enum: ['Salary', 'Freelance', 'Investment', 'Business', 'Gift', 'Other'],
-        default: 'Other'
+        enum: INCOME_CATEGORIES,
+        default: 'Salary'
     },
     source: { 
         type: String, 
@@ -54,7 +74,7 @@ const incomeSchema = new Schema<IIncome>({
     },
     recurringFrequency: { 
         type: String,
-        enum: ['Weekly', 'Bi-weekly', 'Monthly', 'Quarterly', 'Yearly'],
+        enum: RECURRING_FREQUENCIES,
         required: function(this: IIncome) {
             return this.isRecurring;
         }
