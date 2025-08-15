@@ -1,53 +1,55 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../axiosConfig';
-import { Income, IncomeFormData, User } from '../types/income';
+import { useAuth } from '../../context/AuthContext';
+import axiosInstance from '../../axiosConfig';
+import { IExpense } from '../../../../backend/models/Expense';
+import { IAuthenticatedUser } from '../../../../backend/models/User';
+import { ExpenseFormData } from '../../types/expense';
 
-interface IncomeFormProps {
-  incomes: Income[];
-  setIncomes: React.Dispatch<React.SetStateAction<Income[]>>;
-  editingIncome: Income | null;
-  setEditingIncome: React.Dispatch<React.SetStateAction<Income | null>>;
+interface ExpenseFormProps {
+  expenses: IExpense[];
+  setExpenses: React.Dispatch<React.SetStateAction<IExpense[]>>;
+  editingExpense: IExpense | null;
+  setEditingExpense: React.Dispatch<React.SetStateAction<IExpense | null>>;
 }
 
-const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingIncome, setEditingIncome }) => {
-  const { user }: { user: User | null } = useAuth();
-  const [formData, setFormData] = useState<IncomeFormData>({ 
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ expenses, setExpenses, editingExpense, setEditingExpense }) => {
+  const { user }: { user: IAuthenticatedUser | null } = useAuth();
+  const [formData, setFormData] = useState<ExpenseFormData>({ 
     amount: '',
-    dateEarned: new Date().toISOString().split('T')[0], // Today's date
+    dateSpent: new Date().toISOString().split('T')[0], // Today's date
     description: '',
     category: 'Other',
-    source: '',
+    merchant: '',
     isRecurring: false,
     recurringFrequency: undefined,
     startDate: undefined
   });
 
   useEffect(() => {
-    if (editingIncome) {
+    if (editingExpense) {
       setFormData({
-        amount: editingIncome.amount.toString(),
-        dateEarned: editingIncome.dateEarned.split('T')[0], // Convert to YYYY-MM-DD format
-        description: editingIncome.description || '',
-        category: editingIncome.category,
-        source: editingIncome.source || '',
-        isRecurring: editingIncome.isRecurring,
-        recurringFrequency: editingIncome.recurringFrequency,
-        startDate: editingIncome.startDate ? editingIncome.startDate.split('T')[0] : undefined
+        amount: editingExpense.amount.toString(),
+        dateSpent: editingExpense.dateSpent.toString().split('T')[0], // Convert to YYYY-MM-DD format
+        description: editingExpense.description || '',
+        category: editingExpense.category,
+        merchant: editingExpense.merchant || '',
+        isRecurring: editingExpense.isRecurring,
+        recurringFrequency: editingExpense.recurringFrequency,
+        startDate: editingExpense.startDate ? editingExpense.startDate.toString().split('T')[0] : undefined
       });
     } else {
       setFormData({ 
         amount: '',
-        dateEarned: new Date().toISOString().split('T')[0],
+        dateSpent: new Date().toISOString().split('T')[0],
         description: '',
         category: 'Other',
-        source: '',
+        merchant: '',
         isRecurring: false,
         recurringFrequency: undefined,
         startDate: undefined
       });
     }
-  }, [editingIncome]);
+  }, [editingExpense]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -58,7 +60,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
     }
 
     // Validate required fields
-    if (!formData.amount || !formData.description || !formData.source) {
+    if (!formData.amount || !formData.description || !formData.merchant) {
       alert('Please fill in all required fields');
       return;
     }
@@ -70,14 +72,14 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
       return;
     }
 
-    // Validate recurring income fields
+    // Validate recurring expense fields
     if (formData.isRecurring && !formData.recurringFrequency) {
       alert('Please select a recurring frequency');
       return;
     }
 
     if (formData.isRecurring && !formData.startDate) {
-      alert('Please select a start date for recurring income');
+      alert('Please select a start date for recurring expense');
       return;
     }
 
@@ -89,35 +91,35 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
         ...(formData.isRecurring && { startDate: formData.startDate })
       };
 
-      if (editingIncome) {
-        const response = await axiosInstance.put<Income>(`/api/income/${editingIncome._id}`, submitData, {
+      if (editingExpense) {
+        const response = await axiosInstance.put<IExpense>(`/api/expense/${editingExpense._id}`, submitData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setIncomes(incomes.map((income: Income) => (income._id === response.data._id ? response.data : income)));
+        setExpenses(expenses.map((expense: IExpense) => (expense._id === response.data._id ? response.data : expense)));
       } else {
-        const response = await axiosInstance.post<Income>('/api/income/addIncome', submitData, {
+        const response = await axiosInstance.post<IExpense>('/api/expense/addExpense', submitData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setIncomes([...incomes, response.data]);
+        setExpenses([...expenses, response.data]);
       }
-      setEditingIncome(null);
+      setEditingExpense(null);
       setFormData({ 
         amount: '',
-        dateEarned: new Date().toISOString().split('T')[0],
+        dateSpent: new Date().toISOString().split('T')[0],
         description: '',
         category: 'Other',
-        source: '',
+        merchant: '',
         isRecurring: false,
         recurringFrequency: undefined,
         startDate: undefined
       });
     } catch (error: any) {
-      console.error('Error saving income:', error);
-      alert('Failed to save income. Please try again.');
+      console.error('Error saving expense:', error);
+      alert('Failed to save expense. Please try again.');
     }
   };
 
-  const handleInputChange = (field: keyof IncomeFormData) => (
+  const handleInputChange = (field: keyof ExpenseFormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
@@ -126,8 +128,8 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded mb-6">
-      <h1 className="text-2xl font-bold mb-4">{editingIncome ? 'Edit Income' : 'Add Income'}</h1>
-      
+      <h1 className="text-2xl font-bold mb-4">{editingExpense ? 'Edit Expense' : 'Add Expense'}</h1>
+
       {/* Amount Input */}
       <div className="mb-4">
         <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
@@ -148,14 +150,14 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
 
       {/* Date Earned Input */}
       <div className="mb-4">
-        <label htmlFor="dateEarned" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="dateSpent" className="block text-sm font-medium text-gray-700 mb-2">
           Date Earned *
         </label>
         <input
-          id="dateEarned"
+          id="dateSpent"
           type="date"
-          value={formData.dateEarned}
-          onChange={handleInputChange('dateEarned')}
+          value={formData.dateSpent}
+          onChange={handleInputChange('dateSpent')}
           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
           required
         />
@@ -169,7 +171,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
         <input
           id="description"
           type="text"
-          placeholder="Income description"
+          placeholder="Expense description"
           value={formData.description}
           onChange={handleInputChange('description')}
           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -198,23 +200,23 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
         </select>
       </div>
 
-      {/* Source Input */}
+      {/* Merchant Input */}
       <div className="mb-4">
-        <label htmlFor="source" className="block text-sm font-medium text-gray-700 mb-2">
-          Source *
+        <label htmlFor="merchant" className="block text-sm font-medium text-gray-700 mb-2">
+          Merchant *
         </label>
         <input
-          id="source"
+          id="merchant"
           type="text"
-          placeholder="Income source (e.g., Company Name, Client)"
-          value={formData.source}
-          onChange={handleInputChange('source')}
+          placeholder="Merchant name (e.g., Store Name)"
+          value={formData.merchant}
+          onChange={handleInputChange('merchant')}
           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
           required
         />
       </div>
 
-      {/* Recurring Income Checkbox */}
+      {/* Recurring Expense Checkbox */}
       <div className="mb-4">
         <label className="flex items-center">
           <input
@@ -223,7 +225,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
             onChange={handleInputChange('isRecurring')}
             className="mr-2"
           />
-          <span className="text-sm font-medium text-gray-700">This is recurring income</span>
+          <span className="text-sm font-medium text-gray-700">This is recurring expense</span>
         </label>
       </div>
 
@@ -272,10 +274,10 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
         className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition-colors disabled:bg-gray-400"
         disabled={!user?.token}
       >
-        {editingIncome ? 'Update Income' : 'Add Income'}
+        {editingExpense ? 'Update Expense' : 'Add Expense'}
       </button>
     </form>
   );
 };
 
-export default IncomeForm;
+export default ExpenseForm;

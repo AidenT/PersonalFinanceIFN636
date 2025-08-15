@@ -1,5 +1,4 @@
 import React from 'react';
-import { Income } from '../types/income';
 import {
   Table,
   TableBody,
@@ -7,17 +6,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from '../ui/table';
+import { IExpense } from '../../../../backend/models/Expense';
 
-interface IncomeTableProps {
-  incomes: Income[];
+interface ExpenseTableProps {
+  expenses: IExpense[];
   loading: boolean;
-  onEdit: (income: Income) => void;
-  onDelete: (incomeId: string) => void;
+  onEdit: (expense: IExpense) => void;
+  onDelete: (expenseId: string) => void;
 }
 
-const IncomeTable: React.FC<IncomeTableProps> = ({
-  incomes,
+const ExpenseTable: React.FC<ExpenseTableProps> = ({
+  expenses,
   loading,
   onEdit,
   onDelete,
@@ -25,19 +25,19 @@ const IncomeTable: React.FC<IncomeTableProps> = ({
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Your Income Records</h2>
-        {incomes.length > 0 && (
-          <div className="text-lg font-bold text-green-600">
-            Total: ${incomes.reduce((sum, income) => sum + income.amount, 0).toFixed(2)}
+        <h2 className="text-xl font-semibold">Your Expense Records</h2>
+        {expenses.length > 0 && (
+          <div className="text-lg font-bold text-red-600">
+            Total: ${expenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2)}
           </div>
         )}
       </div>
       
       {loading ? (
-        <div className="text-center py-4">Loading incomes...</div>
-      ) : incomes.length === 0 ? (
+        <div className="text-center py-4">Loading expenses...</div>
+      ) : expenses.length === 0 ? (
         <div className="text-center py-4 text-gray-500">
-          No income records found. Add your first income entry!
+          No expense records found. Add your first expense entry!
         </div>
       ) : (
         <div className="max-h-96 overflow-y-auto">
@@ -47,36 +47,36 @@ const IncomeTable: React.FC<IncomeTableProps> = ({
                 <TableHead>Amount</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Date Earned</TableHead>
-                <TableHead>Source</TableHead>
+                <TableHead>Date Spent</TableHead>
+                <TableHead>Merchant</TableHead>
                 <TableHead>Recurring</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {incomes.map((income) => (
+              {expenses.map((expense) => (
                 <TableRow
-                  key={income._id}
+                  key={expense._id}
                   className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => onEdit(income)}
+                  onClick={() => onEdit(expense)}
                 >
                   <TableCell className="font-medium">
-                    ${income.amount.toFixed(2)}
+                    ${expense.amount.toFixed(2)}
                   </TableCell>
-                  <TableCell>{income.category}</TableCell>
+                  <TableCell>{expense.category}</TableCell>
                   <TableCell>
-                    {income.description || '-'}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(income.dateEarned).toLocaleDateString()}
+                    {expense.description || '-'}
                   </TableCell>
                   <TableCell>
-                    {income.source || '-'}
+                    {new Date(expense.dateSpent).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    {income.isRecurring ? (
+                    {expense.merchant || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {expense.isRecurring ? (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                        {income.recurringFrequency}
+                        {expense.recurringFrequency}
                       </span>
                     ) : (
                       <span className="text-gray-500">No</span>
@@ -84,11 +84,11 @@ const IncomeTable: React.FC<IncomeTableProps> = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      {/* Edit happens in IncomeForm */}
+                      {/* Edit happens in ExpenseForm */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onEdit(income);
+                          onEdit(expense);
                         }}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
@@ -97,7 +97,7 @@ const IncomeTable: React.FC<IncomeTableProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDelete(income._id);
+                          onDelete(expense._id);
                         }}
                         className="text-red-600 hover:text-red-800 text-sm"
                       >
@@ -115,4 +115,4 @@ const IncomeTable: React.FC<IncomeTableProps> = ({
   );
 };
 
-export default IncomeTable;
+export default ExpenseTable;
