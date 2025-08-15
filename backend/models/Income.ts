@@ -1,26 +1,26 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// Constants for dropdowns and validation
-export const INCOME_CATEGORIES = [
-    'Salary',
-    'Freelance',
-    'Investment',
-    'Business',
-    'Gift',
-    'Other'
-] as const;
+// This is a duplicated const also in frontend/types until PFA-80 (User story 22 can be completed)
+export const INCOME_CATEGORIES = {
+    SALARY: 'Salary',
+    FREELANCE: 'Freelance',
+    INVESTMENT: 'Investment',
+    BUSINESS: 'Business',
+    GIFT: 'Gift',
+    OTHER: 'Other'
+} as const;
 
-export const RECURRING_FREQUENCIES = [
-    'Weekly',
-    'Bi-weekly',
-    'Monthly',
-    'Quarterly',
-    'Yearly'
-] as const;
+export const RECURRING_FREQUENCIES = {
+    WEEKLY: 'Weekly',
+    BI_WEEKLY: 'Bi-weekly',
+    MONTHLY: 'Monthly',
+    QUARTERLY: 'Quarterly',
+    YEARLY: 'Yearly'
+} as const;
 
 // Utility types
-export type IncomeCategory = typeof INCOME_CATEGORIES[number];
-export type RecurringFrequency = typeof RECURRING_FREQUENCIES[number];
+export type IncomeCategory = typeof INCOME_CATEGORIES[keyof typeof INCOME_CATEGORIES];
+export type RecurringFrequency = typeof RECURRING_FREQUENCIES[keyof typeof RECURRING_FREQUENCIES];
 
 export interface BaseIncome {
     amount: number;

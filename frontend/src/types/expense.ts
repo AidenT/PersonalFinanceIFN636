@@ -1,5 +1,4 @@
-// Shared expense constants and types (copied from shared for CRA compatibility)
-
+// This is a duplicated const also in frontend/types until PFA-80 (User story 22 can be completed)
 export const EXPENSE_CATEGORIES = {
     HOUSING: 'Housing',
     TRANSPORTATION: 'Transportation',

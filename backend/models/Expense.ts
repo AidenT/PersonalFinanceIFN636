@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// Shared expense constants and types
+// This is a duplicated const also in frontend/types until PFA-80 (User story 22 can be completed)
 export const EXPENSE_CATEGORIES = {
     HOUSING: 'Housing',
     TRANSPORTATION: 'Transportation',
@@ -26,7 +26,6 @@ export const RECURRING_FREQUENCIES = {
 export type ExpenseCategory = typeof EXPENSE_CATEGORIES[keyof typeof EXPENSE_CATEGORIES];
 export type RecurringFrequency = typeof RECURRING_FREQUENCIES[keyof typeof RECURRING_FREQUENCIES];
 
-// Base expense interface (shared between frontend and backend)
 export interface BaseExpense {
     amount: number;
     dateSpent: Date | string; // Allow both Date and string for API compatibility
@@ -37,7 +36,6 @@ export interface BaseExpense {
     recurringFrequency?: RecurringFrequency;
     startDate?: Date | string; // Allow both Date and string for API compatibility
 }
-
 
 // Mongoose Document interface for Expense
 export interface IExpense extends Document, BaseExpense {

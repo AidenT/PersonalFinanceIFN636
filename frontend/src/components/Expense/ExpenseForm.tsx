@@ -59,20 +59,17 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expenses, setExpenses, editin
       return;
     }
 
-    // Validate required fields
     if (!formData.amount || !formData.description || !formData.merchant) {
       alert('Please fill in all required fields');
       return;
     }
 
-    // Validate amount is positive
     const amount = parseFloat(formData.amount);
     if (isNaN(amount) || amount <= 0) {
       alert('Please enter a valid positive amount');
       return;
     }
 
-    // Validate recurring expense fields
     if (formData.isRecurring && !formData.recurringFrequency) {
       alert('Please select a recurring frequency');
       return;

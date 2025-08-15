@@ -102,7 +102,7 @@ const updateUserProfile = async (req, res) => {
     }
 };
 exports.updateUserProfile = updateUserProfile;
-// CommonJS export for Node.js (with destructuring support)
+// CommonJS export for Node.js for tests
 module.exports = { registerUser, loginUser, updateUserProfile, getProfile };
 exports.default = { registerUser, loginUser, updateUserProfile, getProfile };
 //# sourceMappingURL=authController.js.map
