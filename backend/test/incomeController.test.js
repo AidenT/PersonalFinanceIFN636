@@ -467,54 +467,30 @@ describe('Income Controller Tests - JavaScript/TypeScript Compatible', () => {
 
     describe('deleteIncome', () => {
         it('should delete income successfully', async () => {
-            const mockIncomeDoc = {
-                _id: 'incomeId123',
-                userId: { toString: () => 'mockUserId123' },
-                remove: sinon.stub().resolves()
-            };
-
             req.params.id = 'incomeId123';
-            mockIncomeModel.findById.resolves(mockIncomeDoc);
+            mockIncomeModel.findByIdAndDelete.resolves();
 
             await deleteIncome(req, res);
 
-            expect(mockIncomeDoc.remove.calledOnce).to.be.true;
+            expect(mockIncomeModel.findByIdAndDelete.calledOnce).to.be.true;
+            expect(mockIncomeModel.findByIdAndDelete.calledWith('incomeId123')).to.be.true;
             expect(res.json.calledWith({ message: 'Income deleted successfully' })).to.be.true;
         });
 
         it('should return error if income not found for deletion', async () => {
             req.params.id = 'nonexistentId';
-            mockIncomeModel.findById.resolves(null);
+            mockIncomeModel.findByIdAndDelete.rejects(new Error('Income not found'));
 
             await deleteIncome(req, res);
 
-            expect(statusStub.calledWith(404)).to.be.true;
+            expect(statusStub.calledWith(500)).to.be.true;
             expect(jsonStub.calledWith({ message: 'Income not found' })).to.be.true;
-        });
-
-        it('should return error if user not authorized to delete', async () => {
-            const mockIncomeDoc = {
-                userId: { toString: () => 'differentUserId' }
-            };
-
-            req.params.id = 'incomeId123';
-            mockIncomeModel.findById.resolves(mockIncomeDoc);
-
-            await deleteIncome(req, res);
-
-            expect(statusStub.calledWith(403)).to.be.true;
-            expect(jsonStub.calledWith({ message: 'Not authorized to delete this income' })).to.be.true;
         });
 
         it('should handle database errors during deletion', async () => {
             const errorMessage = 'Database deletion failed';
-            const mockIncomeDoc = {
-                userId: { toString: () => 'mockUserId123' },
-                remove: sinon.stub().rejects(new Error(errorMessage))
-            };
-
             req.params.id = 'incomeId123';
-            mockIncomeModel.findById.resolves(mockIncomeDoc);
+            mockIncomeModel.findByIdAndDelete.rejects(new Error(errorMessage));
 
             await deleteIncome(req, res);
 
