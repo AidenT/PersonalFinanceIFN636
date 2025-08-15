@@ -27,7 +27,6 @@ const addIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Promi
     }: CreateIncomeRequest = req.body;
 
     try {
-        // Validate required fields
         if (!amount || !description || !category || !source) {
             res.status(400).json({ 
                 message: 'Missing required fields: amount, description, category, source' 
@@ -35,13 +34,11 @@ const addIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Promi
             return;
         }
 
-        // Validate amount is positive
         if (amount <= 0) {
             res.status(400).json({ message: 'Amount must be greater than 0' });
             return;
         }
 
-        // Validate recurring income fields
         if (isRecurring && !recurringFrequency) {
             res.status(400).json({ 
                 message: 'Recurring frequency is required for recurring income' 
@@ -94,19 +91,16 @@ const updateIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Pr
             return;
         }
 
-        // Check if the income belongs to the authenticated user
         if (income.userId.toString() !== req.user?._id?.toString()) {
             res.status(403).json({ message: 'Not authorized to update this income' });
             return;
         }
 
-        // Validate amount if provided
         if (amount !== undefined && amount <= 0) {
             res.status(400).json({ message: 'Amount must be greater than 0' });
             return;
         }
 
-        // Update fields (use !== undefined to allow empty strings)
         if (amount !== undefined) income.amount = amount;
         if (dateEarned !== undefined) income.dateEarned = dateEarned;
         if (description !== undefined) income.description = description;
@@ -114,7 +108,6 @@ const updateIncome = async (req: AuthenticatedRequest, res: ExpressResponse): Pr
         if (source !== undefined) income.source = source;
         if (isRecurring !== undefined) income.isRecurring = isRecurring;
         
-        // Handle recurring fields
         if (income.isRecurring) {
             if (recurringFrequency !== undefined) income.recurringFrequency = recurringFrequency as any;
             if (startDate !== undefined) income.startDate = startDate;
@@ -159,7 +152,7 @@ const getIncomeById = async (req: AuthenticatedRequest, res: ExpressResponse): P
     }
 };
 
-// Export using both CommonJS and ES6 for compatibility
+// Export using both CommonJS and ES6 for tests
 const incomeController = { 
     getIncomes, 
     addIncome, 

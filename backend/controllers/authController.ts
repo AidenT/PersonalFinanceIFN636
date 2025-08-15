@@ -16,7 +16,6 @@ interface ProfileResponseData {
     address?: string;
 }
 
-// Express request/response types (simplified)
 interface ExpressRequest {
     body: any;
     user?: {
@@ -119,7 +118,7 @@ const updateUserProfile = async (req: ExpressRequest, res: ExpressResponse): Pro
     }
 };
 
-// CommonJS export for Node.js (with destructuring support)
+// CommonJS export for Node.js for tests
 module.exports = { registerUser, loginUser, updateUserProfile, getProfile };
 
 // ES6 export for TypeScript/modern environments

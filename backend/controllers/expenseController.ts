@@ -1,6 +1,6 @@
 import Expense, { IExpense } from '../models/Expense';
 import { AuthenticatedRequest, ExpressResponse } from '../types/authTypes';
-import { CreateExpenseRequest } from '../types/expenseTypes'
+import { CreateExpenseRequest, UpdateExpenseRequest } from '../types/expenseTypes'
 
 const getExpenses = async (req: AuthenticatedRequest, res: ExpressResponse): Promise<void> => {
     try {
@@ -43,7 +43,6 @@ const addExpense = async (req: AuthenticatedRequest, res: ExpressResponse): Prom
     }: CreateExpenseRequest = req.body;
 
     try {
-        // Validate required fields
         if (!amount || !description || !category || !merchant) {
             res.status(400).json({ 
                 message: 'Missing required fields: amount, description, category, merchant' 
@@ -51,13 +50,11 @@ const addExpense = async (req: AuthenticatedRequest, res: ExpressResponse): Prom
             return;
         }
 
-        // Validate amount is positive
         if (amount <= 0) {
             res.status(400).json({ message: 'Amount must be greater than 0' });
             return;
         }
 
-        // Validate recurring expense fields
         if (isRecurring && !recurringFrequency) {
             res.status(400).json({ 
                 message: 'Recurring frequency is required for recurring expenses' 
@@ -91,6 +88,58 @@ const addExpense = async (req: AuthenticatedRequest, res: ExpressResponse): Prom
     }
 };
 
+const updateExpense = async (req: AuthenticatedRequest, res: ExpressResponse): Promise<void> => {
+    const { 
+        amount, 
+        dateSpent, 
+        description, 
+        category, 
+        merchant, 
+        isRecurring, 
+        recurringFrequency, 
+        startDate 
+    }: UpdateExpenseRequest = req.body;
+
+    try {
+        const expense: IExpense | null = await Expense.findById(req.params.id);
+        if (!expense) {
+            res.status(404).json({ message: 'Expense not found' });
+            return;
+        }
+
+        if (expense.userId.toString() !== req.user?._id?.toString()) {
+            res.status(403).json({ message: 'Not authorized to update this expense' });
+            return;
+        }
+
+        if (amount !== undefined && amount <= 0) {
+            res.status(400).json({ message: 'Amount must be greater than 0' });
+            return;
+        }
+
+        if (amount !== undefined) expense.amount = amount;
+        if (dateSpent !== undefined) expense.dateSpent = dateSpent;
+        if (description !== undefined) expense.description = description;
+        if (category !== undefined) expense.category = category as any;
+        if (merchant !== undefined) expense.merchant = merchant;
+        if (isRecurring !== undefined) expense.isRecurring = isRecurring;
+        
+        if (expense.isRecurring) {
+            if (recurringFrequency !== undefined) expense.recurringFrequency = recurringFrequency as any;
+            if (startDate !== undefined) expense.startDate = startDate;
+        } else {
+            // Clear recurring fields if not recurring
+            expense.recurringFrequency = undefined;
+            expense.startDate = undefined;
+        }
+
+        const updatedExpense: IExpense = await expense.save();
+        res.json(updatedExpense);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const deleteExpense = async (req: AuthenticatedRequest, res: ExpressResponse): Promise<void> => {
     try {
         await Expense.findByIdAndDelete(req.params.id);
@@ -101,18 +150,18 @@ const deleteExpense = async (req: AuthenticatedRequest, res: ExpressResponse): P
 };
 
 
-// Export using both CommonJS and ES6 for compatibility
+// Export using both CommonJS and ES6 for tests
 const expenseController = { 
     getExpenses,
     getExpenseById,
     addExpense,
-    deleteExpense
-
+    deleteExpense,
+    updateExpense
 };
 
 // CommonJS export for Node.js
 module.exports = expenseController;
 
 // ES6 export for TypeScript/modern environments
-export { getExpenses, getExpenseById, addExpense, deleteExpense };
+export { getExpenses, getExpenseById, addExpense, deleteExpense, updateExpense };
 export default expenseController;

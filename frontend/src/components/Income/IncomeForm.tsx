@@ -59,20 +59,17 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ incomes, setIncomes, editingInc
       return;
     }
 
-    // Validate required fields
     if (!formData.amount || !formData.description || !formData.source) {
       alert('Please fill in all required fields');
       return;
     }
 
-    // Validate amount is positive
     const amount = parseFloat(formData.amount);
     if (isNaN(amount) || amount <= 0) {
       alert('Please enter a valid positive amount');
       return;
     }
 
-    // Validate recurring income fields
     if (formData.isRecurring && !formData.recurringFrequency) {
       alert('Please select a recurring frequency');
       return;

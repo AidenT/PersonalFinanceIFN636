@@ -21,7 +21,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 
 // Now require the COMPILED controller after mocking Expense
-const { getExpenses, addExpense, getExpenseById, deleteExpense } = require('../dist/controllers/expenseController');
+const { getExpenses, addExpense, getExpenseById, deleteExpense, updateExpense } = require('../dist/controllers/expenseController');
 
 // Restore original require
 Module.prototype.require = originalRequire;
@@ -303,6 +303,162 @@ describe('Expense Controller Tests - JavaScript/TypeScript Compatible', () => {
             mockExpenseModel.findById.rejects(new Error(errorMessage));
 
             await getExpenseById(req, res);
+
+            expect(statusStub.calledWith(500)).to.be.true;
+            expect(jsonStub.calledWith({ message: errorMessage })).to.be.true;
+        });
+    });
+
+    describe('updateExpense', () => {
+        it('should update expense successfully', async () => {
+            const mockExpenseDoc = {
+                _id: 'expenseId123',
+                userId: { toString: () => 'mockUserId123' },
+                amount: 1000,
+                description: 'Original description',
+                category: 'Salary',
+                merchant: 'Company',
+                isRecurring: false,
+                save: sinon.stub().resolves({
+                    _id: 'expenseId123',
+                    userId: 'mockUserId123',
+                    amount: 1500,
+                    description: 'Updated description',
+                    category: 'Freelance',
+                    merchant: 'Client',
+                    isRecurring: false
+                })
+            };
+
+            req.params.id = 'expenseId123';
+            req.body = {
+                amount: 1500,
+                description: 'Updated description',
+                category: 'Freelance',
+                merchant: 'Client'
+            };
+            mockExpenseModel.findById.resolves(mockExpenseDoc);
+
+            await updateExpense(req, res);
+
+            expect(mockExpenseDoc.save.calledOnce).to.be.true;
+            expect(mockExpenseDoc.amount).to.equal(1500);
+            expect(mockExpenseDoc.description).to.equal('Updated description');
+            expect(mockExpenseDoc.category).to.equal('Freelance');
+            expect(mockExpenseDoc.merchant).to.equal('Client');
+            expect(res.json.calledOnce).to.be.true;
+        });
+
+        it('should return error if expense not found for update', async () => {
+            req.params.id = 'nonexistentId';
+            req.body = { amount: 1500 };
+            mockExpenseModel.findById.resolves(null);
+
+            await updateExpense(req, res);
+
+            expect(statusStub.calledWith(404)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Expense not found' })).to.be.true;
+        });
+
+        it('should return error if user not authorized to update', async () => {
+            const mockExpenseDoc = {
+                userId: { toString: () => 'differentUserId' }
+            };
+
+            req.params.id = 'expenseId123';
+            req.body = { amount: 1500 };
+            mockExpenseModel.findById.resolves(mockExpenseDoc);
+
+            await updateExpense(req, res);
+
+            expect(statusStub.calledWith(403)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Not authorized to update this expense' })).to.be.true;
+        });
+
+        it('should return error for invalid amount update', async () => {
+            const mockExpenseDoc = {
+                userId: { toString: () => 'mockUserId123' }
+            };
+
+            req.params.id = 'expenseId123';
+            req.body = { amount: -100 };
+            mockExpenseModel.findById.resolves(mockExpenseDoc);
+
+            await updateExpense(req, res);
+
+            expect(statusStub.calledWith(400)).to.be.true;
+            expect(jsonStub.calledWith({ message: 'Amount must be greater than 0' })).to.be.true;
+        });
+
+        it('should update recurring expense fields correctly', async () => {
+            const mockExpenseDoc = {
+                _id: 'expenseId123',
+                userId: { toString: () => 'mockUserId123' },
+                amount: 1000,
+                isRecurring: false,
+                recurringFrequency: undefined,
+                startDate: undefined,
+                save: sinon.stub().resolves({
+                    _id: 'expenseId123',
+                    userId: 'mockUserId123',
+                    amount: 1000,
+                    isRecurring: true,
+                    recurringFrequency: 'Monthly',
+                    startDate: '2024-01-01'
+                })
+            };
+
+            req.params.id = 'expenseId123';
+            req.body = {
+                isRecurring: true,
+                recurringFrequency: 'Monthly',
+                startDate: '2024-01-01'
+            };
+            mockExpenseModel.findById.resolves(mockExpenseDoc);
+
+            await updateExpense(req, res);
+
+            expect(mockExpenseDoc.isRecurring).to.be.true;
+            expect(mockExpenseDoc.recurringFrequency).to.equal('Monthly');
+            expect(mockExpenseDoc.startDate).to.equal('2024-01-01');
+            expect(mockExpenseDoc.save.calledOnce).to.be.true;
+        });
+
+        it('should clear recurring fields when isRecurring is set to false', async () => {
+            const mockExpenseDoc = {
+                _id: 'expenseId123',
+                userId: { toString: () => 'mockUserId123' },
+                amount: 1000,
+                isRecurring: true,
+                recurringFrequency: 'Monthly',
+                startDate: '2024-01-01',
+                save: sinon.stub().resolves({})
+            };
+
+            req.params.id = 'expenseId123';
+            req.body = { isRecurring: false };
+            mockExpenseModel.findById.resolves(mockExpenseDoc);
+
+            await updateExpense(req, res);
+
+            expect(mockExpenseDoc.isRecurring).to.be.false;
+            expect(mockExpenseDoc.recurringFrequency).to.be.undefined;
+            expect(mockExpenseDoc.startDate).to.be.undefined;
+            expect(mockExpenseDoc.save.calledOnce).to.be.true;
+        });
+
+        it('should handle database errors during update', async () => {
+            const errorMessage = 'Database update failed';
+            const mockExpenseDoc = {
+                userId: { toString: () => 'mockUserId123' },
+                save: sinon.stub().rejects(new Error(errorMessage))
+            };
+
+            req.params.id = 'expenseId123';
+            req.body = { amount: 1500 };
+            mockExpenseModel.findById.resolves(mockExpenseDoc);
+
+            await updateExpense(req, res);
 
             expect(statusStub.calledWith(500)).to.be.true;
             expect(jsonStub.calledWith({ message: errorMessage })).to.be.true;

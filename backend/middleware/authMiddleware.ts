@@ -12,13 +12,10 @@ const protect = async (req: AuthenticatedRequest, res: ExpressResponse, next: Ne
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // Extract token from Bearer header
             token = req.headers.authorization.split(' ')[1];
             
-            // Verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as UserPayload;
-            
-            // Get user from token and attach to request
+
             const user = await User.findById(decoded.id).select('-password');
             
             if (!user) {
@@ -34,13 +31,12 @@ const protect = async (req: AuthenticatedRequest, res: ExpressResponse, next: Ne
             return;
         }
     } else {
-        // Fixed: This should be an else block, not a separate if
         res.status(401).json({ message: 'Not authorized, no token' });
         return;
     }
 };
 
-// Export using both CommonJS and ES6 for compatibility
+// Export using both CommonJS and ES6 for compatibility for tests
 const authMiddleware = { protect };
 
 // CommonJS export for Node.js
