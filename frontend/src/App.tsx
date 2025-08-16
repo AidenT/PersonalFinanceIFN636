@@ -5,7 +5,10 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import IncomePage from './pages/Income';
 import ExpensePage from './pages/Expense';
+import HomePage from './pages/Home';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ComingSoon from './pages/ComingSoon';
+
 
 
 
@@ -16,10 +19,12 @@ function AppContent() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/profile" replace /> : <Navigate to="/login" replace />} />
+        <Route path="/" element={user ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/comingSoon" element={<ComingSoon />} />
         <Route path="/income" element={<IncomePage />} />
         <Route path="/expense" element={<ExpensePage />} />
       </Routes>
