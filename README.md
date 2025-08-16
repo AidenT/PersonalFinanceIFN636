@@ -18,6 +18,15 @@
 
 This application utilized the provided template which can be found at https://github.com/rajuiit/taskmanagerv0.3 to accelerate development.
 
+**CI/CD:**
+Pushes to the main branch will deploy changes to the EC2 Instance if build is successful, all tests are passing and there are pm2 processes running on the EC2 Instance. Because the EC2 Instance is stopped nightly there are a few common problems which I have raised bugs in JIRA for PFA-100 and PFA-101 will look to automate this. 
+In the meantime make sure axiosConfig is updated with the correct IP address.
+Start the pm2 processes for backend and front end with 
+1. pm2 start “npm run start” --name=“backend”
+2. pm2 serve build/ 3000 --name "Frontend" --spa
+The rest is automated by the CI pipeline which installs the relevant yarn commands to install packages and compile the typescript to javascript.
+
+
 **Running the application locally:**
 Ensure the axiosConfig.jsx has the "localUrl" uncommented and the "live url" commented out (Also check the port matches up with server.ts!)
 In the backend directory run "yarn install" then "yarn run build" - This installs all packages then includes tsc to compile the typescript to javascript

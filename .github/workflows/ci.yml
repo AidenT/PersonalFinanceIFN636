@@ -27,7 +27,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
       
-    - run: pm2 stop all
+    - run: pm2 stop all # This errors if there are no pm2 processes running
+    # TODO: Handle the case where no PM2 processes are running by checking and starting the correct processes
 
     - name: Install Backend Dependencies
       working-directory: ./backend
